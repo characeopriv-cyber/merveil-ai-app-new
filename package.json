@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --root public/developer --outDir ../../dist --emptyOutDir",
     "preview": "vite preview",
     "deploy": "wrangler versions upload --assets=./dist --name merveil-ai-app-new --compatibility-date 2026-09-06"
   },
