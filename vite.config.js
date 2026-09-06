@@ -6,7 +6,9 @@ export default defineConfig({
   build: {
     chunkSizeWarningLimit: 900,
     rollupOptions: {
-      input: "public/developer/index.html",
+      input: {
+        index: "public/developer/index.html",
+      },
       output: {
         manualChunks: {
           vendor: ["react", "react-dom"],
