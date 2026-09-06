@@ -1,12 +1,12 @@
 {
   "name": "merveil-ai-app-new",
   "private": true,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "scripts": {
-    "dev": "vite --root public/developer",
-    "build": "vite build --config vite.config.js --root public/developer --outDir ../../dist --emptyOutDir",
-    "preview": "vite preview --root public/developer",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "deploy": "wrangler versions upload --assets=./dist --name merveil-ai-app-new --compatibility-date 2026-09-06"
   },
   "dependencies": {
