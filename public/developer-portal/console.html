@@ -22,6 +22,21 @@
         api_base_url: "/api/v1"
       }
     };
+    // Older cached console.js builds request this endpoint directly. Return the safe public config locally.
+    (() => {
+      const nativeFetch = window.fetch.bind(window);
+      const fallback = window.__MERVEIL_DEVELOPER_CONFIG__;
+      window.fetch = (input, init) => {
+        const url = typeof input === "string" ? input : input?.url || "";
+        if (url === "/api/v1/developer/config" || url.endsWith("/api/v1/developer/config")) {
+          return Promise.resolve(new Response(JSON.stringify(fallback), {
+            status: 200,
+            headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" }
+          }));
+        }
+        return nativeFetch(input, init);
+      };
+    })();
   </script>
   <script type="module" src="/developer-portal/console.js"></script>
   <script type="module" src="/developer-portal/onboarding-panel.js"></script>
