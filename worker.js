@@ -34,13 +34,7 @@ async function nodeRequest(request) {
   }
   const query = {};
   url.searchParams.forEach((value, key) => { query[key] = value; });
-  return {
-    method: request.method,
-    url: request.url,
-    headers: nodeHeaders(request),
-    query,
-    body
-  };
+  return { method: request.method, url: request.url, headers: nodeHeaders(request), query, body };
 }
 
 class NodeResponse {
@@ -48,10 +42,7 @@ class NodeResponse {
   setHeader(name, value) { this.headers.set(name, String(value)); }
   status(code) { this.statusCode = code; return this; }
   json(body) {
-    this.result = new Response(JSON.stringify(body), {
-      status: this.statusCode,
-      headers: new Headers([...this.headers, ['content-type', 'application/json; charset=utf-8']])
-    });
+    this.result = new Response(JSON.stringify(body), { status: this.statusCode, headers: new Headers([...this.headers, ['content-type', 'application/json; charset=utf-8']]) });
     return this.result;
   }
   end() { this.result = new Response(null, { status: this.statusCode, headers: this.headers }); return this.result; }
@@ -63,6 +54,9 @@ async function handleDeveloperApi(request, env) {
   const match = url.pathname.match(/^\/api\/v1\/developer\/([^/]+)\/?$/);
   if (!match) return null;
   const route = decodeURIComponent(match[1]);
+  if (route === 'config') {
+    return new Response(JSON.stringify({ ok: true, provider: 'cloudflare', access: 'passport', intelligence: 'merveil', server_ready: Boolean(env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY) }), { headers: { 'content-type': 'application/json; charset=utf-8' } });
+  }
   const loader = developerRoutes[route];
   if (!loader) return new Response(JSON.stringify({ error: 'not_found' }), { status: 404, headers: { 'content-type': 'application/json' } });
   try {
@@ -73,17 +67,24 @@ async function handleDeveloperApi(request, env) {
     return output instanceof Response ? output : (res.result || new Response(null, { status: 204 }));
   } catch (error) {
     console.error('[merveil-worker]', route, error);
-    return new Response(JSON.stringify({ error: 'internal_server_error', message: error?.message || 'Request failed' }), {
-      status: 500,
-      headers: { 'content-type': 'application/json; charset=utf-8' }
-    });
+    return new Response(JSON.stringify({ error: 'internal_server_error', message: error?.message || 'Request failed' }), { status: 500, headers: { 'content-type': 'application/json; charset=utf-8' } });
   }
+}
+
+async function handleDeveloperPages(request, env) {
+  const url = new URL(request.url);
+  const path = url.pathname.replace(/\/+$/, '') || '/';
+  if (path === '/developer' || path === '/developer/index.html') return env.ASSETS.fetch(new Request(new URL('/index.html', url), request));
+  if (path === '/developer/console' || path === '/developer/console.html') return env.ASSETS.fetch(new Request(new URL('/console.html', url), request));
+  return null;
 }
 
 export default {
   async fetch(request, env) {
     const apiResponse = await handleDeveloperApi(request, env);
     if (apiResponse) return apiResponse;
+    const pageResponse = await handleDeveloperPages(request, env);
+    if (pageResponse) return pageResponse;
     return env.ASSETS.fetch(request);
   }
 };
