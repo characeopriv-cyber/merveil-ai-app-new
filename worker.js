@@ -1,6 +1,6 @@
 const API_ORIGIN = "https://api.junction.technology";
 const SUPABASE_URL = "https://dixfybqlepticyudikuz.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_zOtxwZ1q_OCpiTunktzypw_14pQnQOh";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_zOtxw1q_OCpiTunktzypw_14pQnQOh";
 
 function isApiRequest(pathname) {
   return pathname === "/api" || pathname.startsWith("/api/");
@@ -16,7 +16,7 @@ function localDeveloperConfig(request) {
       supabase_publishable_key: SUPABASE_PUBLISHABLE_KEY,
       api_base_url: "/api/v1"
     }
-  }, { headers: { "cache-control": "no-store" } });
+  }, { headers: { "cache-control": "no-store", "content-type": "application/json; charset=utf-8" } });
 }
 
 async function proxyApi(request) {
@@ -50,8 +50,6 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // The public developer entry must never fall through to the Citizen app.
-    // Keep the friendly /developer URL separate from the Citizen experience.
     if (url.pathname === "/developer" || url.pathname === "/developer/") {
       return serveAsset(env, request, "/developer-portal/index.html");
     }
@@ -62,9 +60,14 @@ export default {
       return serveAsset(env, request, "/developer-portal/onboarding.html");
     }
 
-    // Developer authentication bootstrap is local so the console does not
-    // depend on the external API proxy just to discover its public Supabase config.
-    if (url.pathname === "/api/v1/developer/config") {
+    // Public developer bootstrap. Never expose a Supabase service-role key.
+    // Aliases keep older cached console builds from breaking authentication.
+    if (
+      url.pathname === "/api/v1/developer/config" ||
+      url.pathname === "/api/v1/developer/config/" ||
+      url.pathname === "/api/developer/config" ||
+      url.pathname === "/developer/config"
+    ) {
       return localDeveloperConfig(request);
     }
 
