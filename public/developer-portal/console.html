@@ -9,15 +9,25 @@
   <link rel="icon" type="image/svg+xml" href="/merveil-mark.svg?v=1">
   <link rel="shortcut icon" href="/merveil-mark.svg?v=1">
   <link rel="stylesheet" href="/developer-portal/console.css">
-  <link rel="stylesheet" href="/developer-portal/developer-enhancements.css?v=1">
+  <link rel="stylesheet" href="/developer-portal/developer-enhancements.css?v=2">
 </head>
 <body>
   <div id="app"><div class="loading">Loading Merveil Developer Console…</div></div>
+  <script>
+    // Safe public bootstrap fallback. This is a Supabase publishable key, never a service-role key.
+    window.__MERVEIL_DEVELOPER_CONFIG__ = {
+      data: {
+        supabase_url: "https://dixfybqlepticyudikuz.supabase.co",
+        supabase_publishable_key: "sb_publishable_zOtxw1q_OCpiTunktzypw_14pQnQOh",
+        api_base_url: "/api/v1"
+      }
+    };
+  </script>
   <script type="module" src="/developer-portal/console.js"></script>
   <script type="module" src="/developer-portal/onboarding-panel.js"></script>
   <script type="module" src="/developer-portal/commercial-panel.js"></script>
   <script type="module" src="/developer-portal/team-panel.js"></script>
   <script type="module" src="/developer-portal/webhook-deliveries.js"></script>
-  <script type="module" src="/developer-portal/developer-enhancements.js?v=1"></script>
+  <script type="module" src="/developer-portal/developer-enhancements.js?v=2"></script>
 </body>
 </html>
