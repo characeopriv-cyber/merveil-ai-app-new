@@ -1,7 +1,22 @@
 const API_ORIGIN = "https://api.junction.technology";
+const SUPABASE_URL = "https://dixfybqlepticyudikuz.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_zOtxwZ1q_OCpiTunktzypw_14pQnQOh";
 
 function isApiRequest(pathname) {
   return pathname === "/api" || pathname.startsWith("/api/");
+}
+
+function localDeveloperConfig(request) {
+  if (request.method !== "GET") {
+    return Response.json({ error: "method_not_allowed" }, { status: 405, headers: { "cache-control": "no-store" } });
+  }
+  return Response.json({
+    data: {
+      supabase_url: SUPABASE_URL,
+      supabase_publishable_key: SUPABASE_PUBLISHABLE_KEY,
+      api_base_url: "/api/v1"
+    }
+  }, { headers: { "cache-control": "no-store" } });
 }
 
 async function proxyApi(request) {
@@ -25,14 +40,34 @@ async function proxyApi(request) {
   return out;
 }
 
+async function serveAsset(env, request, path) {
+  const url = new URL(request.url);
+  url.pathname = path;
+  return env.ASSETS.fetch(new Request(url.toString(), request));
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // Keep the developer console on the same origin while its existing
-    // backend remains on the production API service. This preserves the
-    // existing Supabase/developer authentication implementation instead of
-    // duplicating it inside a static-assets Worker.
+    // The public developer entry must never fall through to the Citizen app.
+    // Keep the friendly /developer URL separate from the Citizen experience.
+    if (url.pathname === "/developer" || url.pathname === "/developer/") {
+      return serveAsset(env, request, "/developer-portal/index.html");
+    }
+    if (url.pathname === "/developer/console" || url.pathname === "/developer/console/") {
+      return serveAsset(env, request, "/developer-portal/console.html");
+    }
+    if (url.pathname === "/developer/onboarding" || url.pathname === "/developer/onboarding/") {
+      return serveAsset(env, request, "/developer-portal/onboarding.html");
+    }
+
+    // Developer authentication bootstrap is local so the console does not
+    // depend on the external API proxy just to discover its public Supabase config.
+    if (url.pathname === "/api/v1/developer/config") {
+      return localDeveloperConfig(request);
+    }
+
     if (isApiRequest(url.pathname)) {
       try {
         return await proxyApi(request);
