@@ -18,9 +18,7 @@
     "formidable": "^3.5.1",
     "web-push": "^3.6.7",
     "@capacitor/core": "^8.5.0",
-    "@capacitor/android": "^8.5.0",
-    "formidable": "^3.5.1",
-    "web-push": "^3.6.7"
+    "@capacitor/android": "^8.5.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^5.0.4",
