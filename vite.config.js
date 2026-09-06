@@ -10,7 +10,7 @@ export default defineConfig({
     emptyOutDir: true,
     chunkSizeWarningLimit: 900,
     rollupOptions: {
-      input: "index.html",
+      input: "public/developer/index.html",
       output: {
         manualChunks: {
           vendor: ["react", "react-dom"],
