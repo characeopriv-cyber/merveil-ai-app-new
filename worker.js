@@ -74,8 +74,10 @@ async function handleDeveloperApi(request, env) {
 async function handleDeveloperPages(request, env) {
   const url = new URL(request.url);
   const path = url.pathname.replace(/\/+$/, '') || '/';
-  if (path === '/developer' || path === '/developer/index.html') return env.ASSETS.fetch(new Request(new URL('/index.html', url), request));
-  if (path === '/developer/console' || path === '/developer/console.html') return env.ASSETS.fetch(new Request(new URL('/console.html', url), request));
+  // One Developer Platform experience: Home, Workspace and Infrastructure are interfaces inside index.html.
+  if (path === '/developer' || path === '/developer/index.html' || path === '/developer/console' || path === '/developer/console.html') {
+    return env.ASSETS.fetch(new Request(new URL('/index.html', url), request));
+  }
   return null;
 }
 
